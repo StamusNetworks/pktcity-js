@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head>
+   <meta charset="utf-8">
+   <title>Babylon - Basic scene</title>
+   <style>
+      html, body {
+         overflow: hidden;
+         width: 100%;
+         height: 100%;
+         margin: 0;
+         padding: 0;
+      }
+      #renderCanvas {
+         width: 100%;
+         height: 100%;
+         touch-action: none;
+      }
+   </style>
+   <script src="babylon.js"></script>
+   <script src="jquery-3.2.1.min.js"></script> <!-- optional physics engine -->
+   <script src="pktcity.js"></script> <!-- optional physics engine -->
+</head>
+<body>
+   <canvas id="renderCanvas"></canvas>
+   <script type="text/javascript">
+            $.ajax(
+                {
+                        type:"GET",
+                        url:"alerts.data",
+                        success: function(data) {
+                            PktCityCreateScene(data);
+                        },
+                        error: function(data) {
+                            console.log("Unable to get data: %s", data);
+                        }
+                        
+                }
+            );
+</script>
+</body>
+</html>
