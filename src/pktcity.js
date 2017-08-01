@@ -89,9 +89,9 @@ function PktCityCreateScene(data) {
                 // Change the scene background color to green.
                 scene.clearColor = new BABYLON.Color3(0, 1, 0);
                 // This creates and positions a free camera
-                var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(15, 20, -15), scene);
+                var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(5, 20, -15), scene);
                 // This targets the camera to scene origin
-                camera.setTarget(new BABYLON.Vector3(0, 10, 0));
+                camera.setTarget(new BABYLON.Vector3(15, 10, 15));
                 // This attaches the camera to the canvas
                 camera.attachControl(canvas, false);
                 // This creates a light, aiming 0,1,0 - to the sky.
@@ -138,7 +138,7 @@ function PktCityCreateScene(data) {
                 var ground = BABYLON.Mesh.CreateGround("ground1", 1000, 1000, 2, scene);
                 ground.material = materialGround;
                 // Leave this function
-                var skybox = BABYLON.Mesh.CreateBox("skyBox", 1000.0, scene);
+                var skybox = BABYLON.Mesh.CreateBox("skyBox", 300.0, scene);
                 var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
                 skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/skybox/skybox", scene);
                 skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
