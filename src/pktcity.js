@@ -6,21 +6,42 @@ class PktCityIP {
         this.mesh = undefined;
     }
 
+    get x() {
+        return this.get_x();
+    }
+
+    get_x() {
+        return this.mesh.position.x;
+    }
+
+    get z() {
+        return this.get_z();
+    }
+
+    get_z() {
+        return this.mesh.position.z;
+    }
 }
 
 function PktCityCreateMesh(pktip, x, z, material, scene, time) {
     /* FIXME regle de trois sur le temps */
     var height = (time - pktip.time)/(1000 * 500);
-    console.log(height);
     pktip.mesh = BABYLON.Mesh.CreateCylinder("cylinder", height, 1, 1, 16, 1, scene);
     pktip.mesh.position.x = x;
     pktip.mesh.position.z = z;
+    pktip.mesh.position.y = height / 2;
     /* TODO set time */
-    //pktip.mesh.material = materialCylinder;
+    pktip.mesh.material = material;
 return;
 }
 
-
+function PktCityCreateAlert(source, target, etime, material, scene, time) {
+    var y = (time - etime)/(1000 * 500);
+    //console.log("x " + source.mesh.position.x + " y " + source.y);
+    var curve = [ new BABYLON.Vector3(source.x, y, source.z), new BABYLON.Vector3(target.x, y, target.z)];
+    var tube = BABYLON.Mesh.CreateTube("tube", curve, 0.1, 60, null, 0, scene, false, BABYLON.Mesh.FRONTSIDE);
+    tube.material = material;  
+}
 /*
 class PktCityAlert {
     constructor(jdata) {
@@ -77,6 +98,7 @@ function PktCityCreateScene(data) {
                 var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
                 // Dim the light a small amount
                 light.intensity = .5;
+                var time = Date.parse("2016-12-07T17:24:53.139833+0100"); // - 3600 * 1000;
 
                 var materialCylinder = new BABYLON.StandardMaterial("texture1", scene);
                 materialCylinder.alpha = 1;
@@ -90,10 +112,25 @@ function PktCityCreateScene(data) {
                     x = x * 30 / mod;
                     z = z * 30 / mod;
                     i++;
-                    console.log(scIP);
-                    time = Date.parse("2016-12-07T17:24:53.139833+0100"); // - 3600 * 1000;
                     PktCityCreateMesh(SceneIPs[scIP], x, z, materialCylinder, scene, time);
+                    console.log(SceneIPs[scIP].x);
                 }
+
+                // a tube
+                var matTube = new BABYLON.StandardMaterial("mat1", scene);
+                matTube.alpha = 0.1;
+                matTube.diffuseColor = new BABYLON.Color3(0.5, 0.5, 1.0);
+                matTube.backFaceCulling = false;
+                matTube.wireframe = false;
+
+                events.forEach(function(item, index, array) {
+                    PktCityCreateAlert(SceneIPs[item['alert']['source']['ip']],
+                        SceneIPs[item['alert']['target']['ip']],
+                        Date.parse(item['timestamp']),
+                        matTube,
+                        scene,
+                        time);
+                });
 
                 // Let's try our built-in 'ground' shape. Params: name, width, depth, subdivisions, scene
                 var materialGround = new BABYLON.StandardMaterial("texture1", scene);
@@ -101,7 +138,7 @@ function PktCityCreateScene(data) {
                 var ground = BABYLON.Mesh.CreateGround("ground1", 1000, 1000, 2, scene);
                 ground.material = materialGround;
                 // Leave this function
-                var skybox = BABYLON.Mesh.CreateBox("skyBox", 100.0, scene);
+                var skybox = BABYLON.Mesh.CreateBox("skyBox", 1000.0, scene);
                 var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
                 skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/skybox/skybox", scene);
                 skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
