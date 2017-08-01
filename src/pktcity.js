@@ -98,22 +98,29 @@ function PktCityCreateScene(data) {
                 var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
                 // Dim the light a small amount
                 light.intensity = .5;
+                // FIXME get it from parsing
                 var time = Date.parse("2016-12-07T17:24:53.139833+0100"); // - 3600 * 1000;
 
                 var materialCylinder = new BABYLON.StandardMaterial("texture1", scene);
                 materialCylinder.alpha = 1;
-                var i = 0;
                 var mod = Math.ceil(Math.sqrt(Object.keys(SceneIPs).length));
                 /* FIXME we need to sort them by IP value */
-                for (var scIP in SceneIPs) {
+                var sorted = [];
+                for (var key in SceneIPs) {
+                    sorted.push(key);
+                }
+                function ip2int(ip) {
+                        return ip.split('.').reduce(function(ipInt, octet) { return (ipInt<<8) + parseInt(octet, 10)}, 0) >>> 0;
+                }
+                sorted.sort(function(a, b){ return ip2int(a) - ip2int(b)});
+                for (i = 0; i < sorted.length; i++) {
                     var x = Math.floor(i / mod);
                     var z = i % mod;
                     /* scale value */
                     x = x * 30 / mod;
                     z = z * 30 / mod;
-                    i++;
-                    PktCityCreateMesh(SceneIPs[scIP], x, z, materialCylinder, scene, time);
-                    console.log(SceneIPs[scIP].x);
+                    PktCityCreateMesh(SceneIPs[sorted[i]], x, z, materialCylinder, scene, time);
+                    console.log(SceneIPs[sorted[i]].x);
                 }
 
                 // a tube
