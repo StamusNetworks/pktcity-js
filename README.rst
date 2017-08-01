@@ -2,6 +2,16 @@
 pktcity
 =======
 
+Test it
+=======
+
+Copy a alerts.data file containing JSON alerts events in the src directory, then ::
+
+ cd src
+ python -m SimpleHTTPServer 8000
+
+You can now open http://localhost:8000/base.html
+
 Concept
 =======
 
