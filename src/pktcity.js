@@ -41,6 +41,18 @@ function PktCityCreateAlert(source, target, etime, material, scene, time) {
     var curve = [ new BABYLON.Vector3(source.x, y, source.z), new BABYLON.Vector3(target.x, y, target.z)];
     var tube = BABYLON.Mesh.CreateTube("tube", curve, 0.1, 60, null, 0, scene, false, BABYLON.Mesh.FRONTSIDE);
     tube.material = material;  
+    var attack = BABYLON.Mesh.CreateSphere("attack", 16, 0.2, scene);
+    /* attack.position.x = source.x
+    attack.position.y = y;
+    attack.position.z = source.z; */
+    var animation = new BABYLON.Animation("attackAnimation", "position", 30, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+    var keys = [];
+    keys.push({frame: 0, value:   new BABYLON.Vector3(source.x, y, source.z)});
+    keys.push({frame: 100, value:   new BABYLON.Vector3(target.x, y, target.z)});
+    animation.setKeys(keys);
+    attack.animations = [];
+    attack.animations.push(animation);
+    scene.beginAnimation(attack, 0, 100, true);
 }
 /*
 class PktCityAlert {
