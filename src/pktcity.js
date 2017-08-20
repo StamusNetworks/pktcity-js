@@ -35,24 +35,28 @@ function PktCityCreateMesh(pktip, x, z, material, scene, time) {
 return;
 }
 
-function PktCityCreateAlert(source, target, etime, material, scene, time) {
+function PktCityCreateAlert(source, target, etime, material, scene, time, starttime) {
     var y = (time - etime)/(1000 * 500);
     //console.log("x " + source.mesh.position.x + " y " + source.y);
     var curve = [ new BABYLON.Vector3(source.x, y, source.z), new BABYLON.Vector3(target.x, y, target.z)];
     var tube = BABYLON.Mesh.CreateTube("tube", curve, 0.1, 60, null, 0, scene, false, BABYLON.Mesh.FRONTSIDE);
     tube.material = material;  
     var attack = BABYLON.Mesh.CreateSphere("attack", 16, 0.2, scene);
-    /* attack.position.x = source.x
-    attack.position.y = y;
-    attack.position.z = source.z; */
-    var animation = new BABYLON.Animation("attackAnimation", "position", 30, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+    var duration = time - starttime;
+    var fps = 30;
+    var nbframes = fps * 10;
+    var animation = new BABYLON.Animation("attackAnimation", "position", fps, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
     var keys = [];
-    keys.push({frame: 0, value:   new BABYLON.Vector3(source.x, y, source.z)});
-    keys.push({frame: 100, value:   new BABYLON.Vector3(target.x, y, target.z)});
+    startframe = (etime-starttime)/(time-starttime)*nbframes;
+    endframe = startframe + 50;
+    keys.push({frame: startframe, value:   new BABYLON.Vector3(source.x, y, source.z)});
+    keys.push({frame: endframe, value:   new BABYLON.Vector3(target.x, y, target.z)});
+    keys.push({frame: endframe + 1, value:   new BABYLON.Vector3(source.x, y, source.z)});
+    keys.push({frame: nbframes, value:   new BABYLON.Vector3(source.x, y, source.z)});
     animation.setKeys(keys);
     attack.animations = [];
     attack.animations.push(animation);
-    scene.beginAnimation(attack, 0, 100, true);
+    scene.beginAnimation(attack, 0, nbframes, true);
 }
 /*
 class PktCityAlert {
@@ -111,7 +115,8 @@ function PktCityCreateScene(data) {
                 // Dim the light a small amount
                 light.intensity = .5;
                 // FIXME get it from parsing
-                var time = Date.parse("2016-12-07T17:24:53.139833+0100"); // - 3600 * 1000;
+ 		var starttime = Date.parse("2016-12-07T14:17:45.754203+0100");
+                var time = Date.parse("2016-12-07T17:24:53.139833+0100");
 
                 var materialCylinder = new BABYLON.StandardMaterial("texture1", scene);
                 materialCylinder.alpha = 1;
@@ -148,7 +153,7 @@ function PktCityCreateScene(data) {
                         Date.parse(item['timestamp']),
                         matTube,
                         scene,
-                        time);
+                        time, starttime);
                 });
 
                 // Let's try our built-in 'ground' shape. Params: name, width, depth, subdivisions, scene
