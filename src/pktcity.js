@@ -35,13 +35,24 @@ function PktCityCreateMesh(pktip, x, z, material, scene, time) {
 return;
 }
 
-function PktCityCreateAlert(source, target, etime, material, scene, time, starttime) {
+function PktCityCreateAlert(source, target, etime, material, matsource, mattarget, scene, time, starttime) {
     var y = (time - etime)/(1000 * 500);
     //console.log("x " + source.mesh.position.x + " y " + source.y);
     var curve = [ new BABYLON.Vector3(source.x, y, source.z), new BABYLON.Vector3(target.x, y, target.z)];
     var tube = BABYLON.Mesh.CreateTube("tube", curve, 0.1, 60, null, 0, scene, false, BABYLON.Mesh.FRONTSIDE);
     tube.material = material;  
     var attack = BABYLON.Mesh.CreateSphere("attack", 16, 0.2, scene);
+    var sph_source = BABYLON.Mesh.CreateSphere("source", 16, 1.1, scene);
+    sph_source.position.x = source.x;
+    sph_source.position.y = y;
+    sph_source.position.z = source.z;
+    sph_source.material = matsource;
+    var sph_target = BABYLON.Mesh.CreateSphere("target", 16, 1.1, scene);
+    sph_target.position.x = target.x;
+    sph_target.position.y = y;
+    sph_target.position.z = target.z;
+    sph_target.material = mattarget;
+
     var duration = time - starttime;
     var fps = 30;
     var nbframes = fps * 10;
@@ -147,11 +158,20 @@ function PktCityCreateScene(data) {
                 matTube.backFaceCulling = false;
                 matTube.wireframe = false;
 
+                var matSource = new BABYLON.StandardMaterial("source", scene);
+                matSource.difffuseColor = new BABYLON.Color3(1.0, 0.2, 0.2);
+                matSource.emissiveColor = new BABYLON.Color3(1, 0, 0);
+                var matTarget = new BABYLON.StandardMaterial("target", scene);
+                matTarget.difffuseColor = new BABYLON.Color3(0.2, 1, 0.2);
+                matTarget.emissiveColor = new BABYLON.Color3(0, 0, 1);
+
                 events.forEach(function(item, index, array) {
                     PktCityCreateAlert(SceneIPs[item['alert']['source']['ip']],
                         SceneIPs[item['alert']['target']['ip']],
                         Date.parse(item['timestamp']),
                         matTube,
+                        matSource,
+                        matTarget,
                         scene,
                         time, starttime);
                 });
