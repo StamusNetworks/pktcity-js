@@ -93,6 +93,9 @@ function PktCityCreateScene(data) {
                 console.log(err);
             }
         });
+
+        var starttime = undefined;
+        var time = undefined;
         events.forEach(function(item, index, array) {
             if (!(item['alert']['source']['ip'] in SceneIPs)) {
                 var evip = new PktCityIP(item['alert']['source']['ip'], item['timestamp']);
@@ -101,6 +104,13 @@ function PktCityCreateScene(data) {
             if (!(item['alert']['target']['ip'] in SceneIPs)) {
                 var evip = new PktCityIP(item['alert']['target']['ip'], item['timestamp']);
                 SceneIPs[item['alert']['target']['ip']] = evip;
+            }
+            etime = Date.parse(item['timestamp']);
+            if ((starttime == undefined) || (etime < starttime)) {
+                starttime = etime;
+            }
+            if ((time == undefined) || (etime > time)) {
+                time = etime;
             }
         });
         console.log(Object.keys(SceneIPs).length);
@@ -125,10 +135,6 @@ function PktCityCreateScene(data) {
                 var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
                 // Dim the light a small amount
                 light.intensity = .5;
-                // FIXME get it from parsing
- 		var starttime = Date.parse("2016-12-07T14:17:45.754203+0100");
-                var time = Date.parse("2016-12-07T17:24:53.139833+0100");
-
                 var materialCylinder = new BABYLON.StandardMaterial("texture1", scene);
                 materialCylinder.alpha = 1;
                 var mod = Math.ceil(Math.sqrt(Object.keys(SceneIPs).length));
