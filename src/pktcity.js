@@ -35,8 +35,11 @@ function PktCityCreateMesh(pktip, x, z, material, scene, time) {
 return;
 }
 
-function PktCityCreateAlert(source, target, etime, material, matsource, mattarget, scene, time, starttime) {
+function PktCityCreateAlert(SceneIPs, item, etime, material, matsource, mattarget, scene, time, starttime) {
     var y = (time - etime)/(1000 * 500);
+    var source = SceneIPs[item['alert']['source']['ip']];
+    var target = SceneIPs[item['alert']['target']['ip']];
+
     //console.log("x " + source.mesh.position.x + " y " + source.y);
     var curve = [ new BABYLON.Vector3(source.x, y, source.z), new BABYLON.Vector3(target.x, y, target.z)];
     var tube = BABYLON.Mesh.CreateTube("tube", curve, 0.1, 60, null, 0, scene, false, BABYLON.Mesh.FRONTSIDE);
@@ -46,7 +49,21 @@ function PktCityCreateAlert(source, target, etime, material, matsource, mattarge
     sph_source.position.x = source.x;
     sph_source.position.y = y;
     sph_source.position.z = source.z;
-    sph_source.material = matsource;
+    sph_source.material = matsource.clone("source " + y);
+
+    sph_source.actionManager = new BABYLON.ActionManager(scene);
+    sph_source.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, function(ev){
+				    var meshLocal = ev.meshUnderPointer
+				    meshLocal.material.alpha = 0.1;
+				    //canvas.style.cursor = "move"
+				    }, false));
+
+    sph_source.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, function(ev){
+			    var meshLocal = ev.meshUnderPointer
+			    meshLocal.material.alpha = 1;
+			    //canvas.style.cursor = "default" ;
+			    },false));
+
     var sph_target = BABYLON.Mesh.CreateSphere("target", 16, 1.1, scene);
     sph_target.position.x = target.x;
     sph_target.position.y = y;
@@ -172,9 +189,8 @@ function PktCityCreateScene(data) {
                 matTarget.emissiveColor = new BABYLON.Color3(0, 0, 1);
 
                 events.forEach(function(item, index, array) {
-                    PktCityCreateAlert(SceneIPs[item['alert']['source']['ip']],
-                        SceneIPs[item['alert']['target']['ip']],
-                        Date.parse(item['timestamp']),
+                    PktCityCreateAlert(SceneIPs, item,
+		        Date.parse(item['timestamp']),
                         matTube,
                         matSource,
                         matTarget,
