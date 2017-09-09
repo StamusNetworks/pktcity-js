@@ -35,7 +35,7 @@ function PktCityCreateMesh(pktip, x, z, material, scene, time) {
 return;
 }
 
-function PktCityCreateAlert(SceneIPs, item, etime, material, matsource, mattarget, scene, time, starttime) {
+function PktCityCreateAlert(SceneIPs, item, etime, material, matsource, mattarget, scene, time, starttime, HUD) {
     var y = (time - etime)/(1000 * 500);
     var source = SceneIPs[item['alert']['source']['ip']];
     var target = SceneIPs[item['alert']['target']['ip']];
@@ -55,20 +55,29 @@ function PktCityCreateAlert(SceneIPs, item, etime, material, matsource, mattarge
     sph_source.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, function(ev){
 				    var meshLocal = ev.meshUnderPointer
 				    meshLocal.material.alpha = 0.1;
+                                    var hudsource = HUD.getChildByName("HUDsource");
+                                    hudsource.text = source.ip;
+                                    var hudtarget = HUD.getChildByName("HUDtarget");
+                                    hudtarget.text = target.ip;
 				    //canvas.style.cursor = "move"
+				    sph_target.material.alpha = 0.1;
 				    }, false));
-
     sph_source.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, function(ev){
 			    var meshLocal = ev.meshUnderPointer
 			    meshLocal.material.alpha = 1;
 			    //canvas.style.cursor = "default" ;
+                            var hudvalue = HUD.getChildByName("HUDsource");
+                            hudvalue.text = "";
+                            hudvalue = HUD.getChildByName("HUDtarget");
+                            hudvalue.text = "";
+                            sph_target.material.alpha = 1;
 			    },false));
 
     var sph_target = BABYLON.Mesh.CreateSphere("target", 16, 1.1, scene);
     sph_target.position.x = target.x;
     sph_target.position.y = y;
     sph_target.position.z = target.z;
-    sph_target.material = mattarget;
+    sph_target.material = mattarget.clone("target " + y);
 
     var duration = time - starttime;
     var fps = 30;
@@ -188,6 +197,53 @@ function PktCityCreateScene(data) {
                 matTarget.difffuseColor = new BABYLON.Color3(0.2, 1, 0.2);
                 matTarget.emissiveColor = new BABYLON.Color3(0, 0, 1);
 
+		var HUD = new BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("PktcityHUD");
+                var HUDrectinfo = new BABYLON.GUI.Rectangle("Rectinfo");
+                //HUDrectinfo.background =  new BABYLON.Color3(0.3, 0.3, 0.3);
+                HUDrectinfo.top = window.innerHeight / 2 - 200;
+                HUDrectinfo.left = window.innerWidth / 2 - 160;
+                HUDrectinfo.width = "" + 250 + "px";
+                HUDrectinfo.height = "" + 60 + "px";
+                HUDrectinfo.thickness = 2;
+                HUDrectinfo.cornerRadius = 10;
+                HUD.addControl(HUDrectinfo);
+                var HUDpanelH = new BABYLON.GUI.StackPanel();
+                HUDpanelH.isVertical = false;
+                HUDrectinfo.addControl(HUDpanelH);
+                var HUDlabel = new BABYLON.GUI.StackPanel();
+                HUDpanelH.addControl(HUDlabel);
+                var HUDvalue = new BABYLON.GUI.StackPanel();
+                HUDpanelH.addControl(HUDvalue);
+                var info_height= "20px";
+                var HUDlabelsource = new BABYLON.GUI.TextBlock("HUDlabelsource");
+                HUDlabelsource.text = "Source";
+                HUDlabelsource.color = "white";
+                HUDlabelsource.fontSize = 16;
+                HUDlabelsource.width = "125px";
+                HUDlabelsource.height = info_height;
+                HUDlabel.addControl(HUDlabelsource);
+                var HUDlabeltarget = new BABYLON.GUI.TextBlock("HUDlabeltarget");
+                HUDlabeltarget.text = "Target";
+                HUDlabeltarget.color = "white";
+                HUDlabeltarget.fontSize = 16;
+                HUDlabeltarget.width = "125px";
+                HUDlabeltarget.height = info_height;
+                HUDlabel.addControl(HUDlabeltarget);
+
+                var HUDsource = new BABYLON.GUI.TextBlock("HUDsource");
+                HUDsource.color = "white";
+                HUDsource.fontSize = 16;
+                HUDsource.width = "" + 125 + "px";
+                HUDsource.height = info_height;
+                HUDvalue.addControl(HUDsource);
+
+                var HUDtarget = new BABYLON.GUI.TextBlock("HUDtarget");
+                HUDtarget.color = "white";
+                HUDtarget.fontSize = 16;
+                HUDtarget.width = "" + 125 + "px";
+                HUDtarget.height = info_height;
+                HUDvalue.addControl(HUDtarget);
+
                 events.forEach(function(item, index, array) {
                     PktCityCreateAlert(SceneIPs, item,
 		        Date.parse(item['timestamp']),
@@ -195,7 +251,7 @@ function PktCityCreateScene(data) {
                         matSource,
                         matTarget,
                         scene,
-                        time, starttime);
+                        time, starttime, HUDvalue);
                 });
 
                 // Let's try our built-in 'ground' shape. Params: name, width, depth, subdivisions, scene
@@ -227,6 +283,8 @@ function PktCityCreateScene(data) {
         // Watch for browser/canvas resize events
         window.addEventListener("resize", function () {
                         engine.resize();
+                        //HUDinfo.top = window.innerHeight / 2 - 200;
+                        //HUDinfo.left = window.innerWidth / 2 - 160;
                         });
 
 
