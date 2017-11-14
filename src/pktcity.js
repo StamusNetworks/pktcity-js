@@ -179,6 +179,17 @@ function PktCityCreateScene(data) {
                     /* scale value */
                     x = x * 30 / mod;
                     z = z * 30 / mod;
+                    /* translate mesh by network */
+                    if (SceneIPs[sorted[i]].ip.startsWith("192")) {
+                        x = x + 0;
+                        z = z + 0;
+                    } else if (SceneIPs[sorted[i]].ip.startsWith("10.")) {
+                        x = x + 30;
+                        z = z - 30;
+                    } else {
+                        x = 2 * x - 30;
+                        z = 2 * z - 15;
+                    }
                     PktCityCreateMesh(SceneIPs[sorted[i]], x, z, materialCylinder, scene, time);
                     console.log(SceneIPs[sorted[i]].x);
                 }
